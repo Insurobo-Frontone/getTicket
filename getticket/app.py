@@ -1,9 +1,7 @@
 from dotenv import load_dotenv
-import os 
-import requests
-import json
+import os, requests, json, time, decimal
 from flask import Flask
-
+from datetime import datetime, timedelta
 load_dotenv()
 
 app = Flask(__name__)
@@ -14,22 +12,52 @@ def hello():
 
 @app.post("/getTicket")
 def getTicket():
-    clientId = os.environ.get('clientId')
-    clientSecret = os.environ.get('clientSecret')
-    url = "https://api.moneypin.biz/bizno/v1/auth/token"
+    data={}
+    file_path = "../ticket.json"
 
-    payload = json.dumps({
-    "grantType": "ClientCredentials",
-    "clientId": clientId,
-    "clientSecret": clientSecret
-    })
-    headers = {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json'
-    }
-    
-    response = requests.request("POST", url, headers=headers, data=payload)
-    return response.text
+    # try:
+    with open(file_path, 'r+') as file:
+        temp_data = json.load(file)
+
+
+    now = time.time()
+    dt = datetime.fromtimestamp(now)
+    oldtime = temp_data['time']
+
+    newtime = dt.timestamp()
+
+    olddatetimeobj = datetime.fromtimestamp(oldtime) + timedelta(hours=1)
+    newdatetimeobj = datetime.fromtimestamp(newtime)
+
+    if(newdatetimeobj > olddatetimeobj):
+        clientId = os.environ.get('clientId')
+        clientSecret = os.environ.get('clientSecret')
+        url = "https://api.moneypin.biz/bizno/v1/auth/token"
+
+        payload = json.dumps({
+        "grantType": "ClientCredentials",
+        "clientId": clientId,
+        "clientSecret": clientSecret
+        })
+        headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+        }
+
+        response = requests.request("POST", url, headers=headers, data=payload)
+
+        data = {
+            "tokenset": response.json(),
+            "time": dt.timestamp()
+        }
+    else:
+        data=temp_data
+
+    with open(file_path, 'w', encoding='utf-8') as file:
+        json.dump(data, file)
+    return data['tokenset']['token']
+    # catch (exception):
+    #     return data.json()
 
 @app.post("/getBizInfo")
 def getBizInfo(request):
@@ -47,4 +75,7 @@ def getBizInfo(request):
     }
 
     response = requests.request("POST", url, headers=headers, data=payload)
-    return response.text
+    return response.json()
+
+if __name__ == '__main__':
+    app.run()
