@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
 import os, requests, json, time, decimal
-from flask import Flask
+from flask import Flask, request
 from datetime import datetime, timedelta
 from flask_cors import CORS, cross_origin
 
@@ -37,8 +37,8 @@ def getTicket():
     olddatetimeobj = datetime.fromtimestamp(oldtime) + timedelta(hours=1)
     newdatetimeobj = datetime.fromtimestamp(newtime)
 
-    print("Debug : " + olddatetimeobj)
-    print("Debug : " + newdatetimeobj)
+    # print('Debug : '+olddatetimeobj.timestamp)
+    # print('Debug : '+newdatetimeobj.timestamp)
 
     if (newdatetimeobj > olddatetimeobj):
         clientId = os.environ.get('clientId')
@@ -67,25 +67,23 @@ def getTicket():
     else:
         data = temp_data
         print('Debug: Stored key')
+        
+    res = {
+        "token": data['tokenset']['token']
+    }
 
-    return data['tokenset']['token']
+    return json.dumps(res)
 
 
 @app.post("/getBizInfo")
-def getBizInfo(request):
+def getBizInfo():
     content_Type = request.headers.get('Content-Type')
     accept = request.headers.get('accept')
     authorization = request.headers.get('Authorization')
 
     url = "https://api.moneypin.biz/bizno/v1/biz/info/base"
 
-    print(request)
-
-    payload = json.dumps({
-        "bizNoList": [
-            "2152195730"
-        ]
-    })
+    payload = json.dumps(request.json)
     headers = {
         'Content-Type': content_Type,
         'Accept': accept,
@@ -94,6 +92,7 @@ def getBizInfo(request):
 
     response = requests.request("POST", url, headers=headers, data=payload)
     return response.json()
+
 
 if __name__ == '__main__':
     app.run()
