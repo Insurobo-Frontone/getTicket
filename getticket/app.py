@@ -37,6 +37,9 @@ def getTicket():
     olddatetimeobj = datetime.fromtimestamp(oldtime) + timedelta(hours=1)
     newdatetimeobj = datetime.fromtimestamp(newtime)
 
+    print("Debug : " + olddatetimeobj)
+    print("Debug : " + newdatetimeobj)
+
     if (newdatetimeobj > olddatetimeobj):
         clientId = os.environ.get('clientId')
         clientSecret = os.environ.get('clientSecret')
@@ -56,21 +59,27 @@ def getTicket():
 
         data = {
             "tokenset": response.json(),
-            "time": dt.timestamp()
+            "time": newtime
         }
+        print('Debug: key to Store')
+        with open(file_path, 'w', encoding='utf-8') as file:
+            json.dump(data, file)
     else:
         data = temp_data
+        print('Debug: Stored key')
 
-    with open(file_path, 'w', encoding='utf-8') as file:
-        json.dump(data, file)
     return data['tokenset']['token']
-    # catch (exception):
-    #     return data.json()
 
 
 @app.post("/getBizInfo")
 def getBizInfo(request):
+    content_Type = request.headers.get('Content-Type')
+    accept = request.headers.get('accept')
+    authorization = request.headers.get('Authorization')
+
     url = "https://api.moneypin.biz/bizno/v1/biz/info/base"
+
+    print(request)
 
     payload = json.dumps({
         "bizNoList": [
@@ -78,14 +87,13 @@ def getBizInfo(request):
         ]
     })
     headers = {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOjI4NjQ2OTkzMTQwMDQ2NTksImNpZCI6IjM3MmExZDBiLTk5YzItNDVmNC05MTRjLWE1YWQ1MDQ1YmJmYiIsInBsbiI6InRlc3QiLCJpYXQiOjE3MDQ0NDEzNDMsImV4cCI6MTcwNDQ0ODU0MywiaXNzIjoibW9uZXlwaW46Yml6bm8ifQ.uilt5hEookHurqQP7h-23A0aIDyaDTGK4qiAGApW3xQ'
+        'Content-Type': content_Type,
+        'Accept': accept,
+        'Authorization': authorization
     }
 
     response = requests.request("POST", url, headers=headers, data=payload)
     return response.json()
-
 
 if __name__ == '__main__':
     app.run()
