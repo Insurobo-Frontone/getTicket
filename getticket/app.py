@@ -5,12 +5,13 @@ from datetime import datetime, timedelta
 from flask_cors import CORS, cross_origin
 
 app = Flask(__name__)
-app.config['CORS_HEADERS'] = 'Content-Type'
+# app.config['CORS_HEADERS'] = 'Content-Type'
 load_dotenv()
-cors = CORS(app, resources={
-    r"/getTicket/*": {"origin": "*"},
-    r"/getBizInfo/*": {"origin": "*"},
-})
+CORS(app)
+# cors = CORS(app, resources={
+#     r"/getTicket/*": {"origin": "*"},
+#     r"/getBizInfo/*": {"origin": "*"},
+# })
 
 
 @app.route("/")
@@ -19,7 +20,7 @@ def helloWorld():
     return "Hello, cross-origin-world!"
 
 
-@app.post("/getTicket")
+@app.route("/getTicket", methods=['POST'])
 def getTicket():
     data = {}
     file_path = "./ticket.json"
@@ -75,7 +76,7 @@ def getTicket():
     return json.dumps(res)
 
 
-@app.post("/getBizInfo")
+@app.route("/getBizInfo", methods=['POST'])
 def getBizInfo():
     content_Type = request.headers.get('Content-Type')
     accept = request.headers.get('accept')
@@ -91,8 +92,15 @@ def getBizInfo():
     }
 
     response = requests.request("POST", url, headers=headers, data=payload)
+    
     return response.json()
 
+@app.after_request
+def apply_caching(response):
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    return response
 
 if __name__ == '__main__':
+    import sys
+    print(sys.path)
     app.run()
