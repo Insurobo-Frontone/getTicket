@@ -5,13 +5,14 @@ from datetime import datetime, timedelta
 from flask_cors import CORS, cross_origin
 
 app = Flask(__name__)
-# app.config['CORS_HEADERS'] = 'Content-Type'
+app.config['CORS_HEADERS'] = 'Content-Type'
 load_dotenv()
-CORS(app)
-# cors = CORS(app, resources={
-#     r"/getTicket/*": {"origin": "*"},
-#     r"/getBizInfo/*": {"origin": "*"},
-# })
+#CORS(app)
+cors = CORS(app, resources={
+    r"/getTicket/*": {"origin": "*"},
+    r"/getBizInfo/*": {"origin": "*"},
+    r"/getBizInfoOnce/*": {"origin": "*"},
+})
 
 
 @app.route("/")
@@ -78,7 +79,7 @@ def getTicket():
 
 @app.route("/getBizInfo", methods=['POST'])
 def getBizInfo():
-    content_Type = request.headers.get('Content-Type')
+    content_type = request.headers.get('Content-Type')
     accept = request.headers.get('accept')
     authorization = request.headers.get('Authorization')
 
@@ -86,7 +87,7 @@ def getBizInfo():
 
     payload = json.dumps(request.json)
     headers = {
-        'Content-Type': content_Type,
+        'Content-Type': content_type,
         'Accept': accept,
         'Authorization': authorization
     }
@@ -149,11 +150,11 @@ def getBizInfoOnce():
         "token": data['tokenset']['token']
     }
 
-    token=res['token']
+    token = res['token']
 
     content_type = request.headers.get('Content-Type')
     accept = request.headers.get('accept')
-    authorization = "Authorization: Bearer "+token
+    authorization = "Bearer "+token
 
     url = "https://api.moneypin.biz/bizno/v1/biz/info/base"
 
