@@ -10,12 +10,16 @@ app = Flask(__name__)
 
 load_dotenv()
 CORS(app)
-# cors = CORS(app, resources={
-#     r"/getTicket/*": {"origin": "*"},
-#     r"/getBizInfo/*": {"origin": "*"},
-#     r"/getBizInfoOnce/*": {"origin": "*"},
-# })
+cors = CORS(app, resources={
+    r"/getTicket/*": {"origin": "*"},
+    r"/getBizInfo/*": {"origin": "*"},
+    r"/getBizInfoOnce/*": {"origin": "*"},
+})
 
+@app.route("/apiticket")
+@cross_origin()
+def helloWorld2():
+    return "Hello, cross-origin-world!2"
 
 @app.route("/")
 @cross_origin()
@@ -23,7 +27,7 @@ def helloWorld():
     return "Hello, cross-origin-world!"
 
 
-@app.route("/getTicket", methods=['POST'])
+@app.route("/apiticket/getTicket", methods=['POST'])
 def getTicket():
     data = {}
     file_path = "./ticket.json"
@@ -71,15 +75,14 @@ def getTicket():
     else:
         data = temp_data
         print('Debug: Stored key')
-        
+
     res = {
         "token": data['tokenset']['token']
     }
 
     return json.dumps(res)
 
-
-@app.route("/getBizInfo", methods=['POST'])
+@app.route("/apiticket/getBizInfo", methods=['POST'])
 def getBizInfo():
     content_type = request.headers.get('Content-Type')
     accept = request.headers.get('accept')
@@ -95,7 +98,7 @@ def getBizInfo():
     }
 
     response = requests.request("POST", url, headers=headers, data=payload)
-    
+
     return response.json()
 
 def _build_cors_preflight_response():
@@ -103,10 +106,10 @@ def _build_cors_preflight_response():
     response.headers.add("Access-Control-Allow-Origin", "*")
     response.headers.add('Access-Control-Allow-Headers', "*")
     response.headers.add('Access-Control-Allow-Methods', "*")
-    response.status = "200"
+    response.status="200"
     return response
 
-@app.route("/getBizInfoOnce", methods=['POST', "OPTIONS"])
+@app.route("/apiticket/getBizInfoOnce", methods=['POST', "OPTIONS"])
 def getBizInfoOnce():
     if request.method == "OPTIONS":  # CORS preflight
         return _build_cors_preflight_response()
@@ -166,7 +169,7 @@ def getBizInfoOnce():
 
         content_type = request.headers.get('Content-Type')
         accept = request.headers.get('accept')
-        authorization = "Bearer "+token
+        authorization = "Bearer " + token
 
         url = "https://api.moneypin.biz/bizno/v1/biz/info/base"
 
@@ -181,7 +184,7 @@ def getBizInfoOnce():
 
         response = requests.request("POST", url, headers=headers, data=payload)
 
-        list=response.json()
+        list = response.json()
 
         return json.dumps(list)
 
@@ -196,6 +199,4 @@ def apply_caching(response):
     return response
 
 if __name__ == '__main__':
-    import sys
-    print(sys.path)
-    app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0',port='5000')
