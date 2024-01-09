@@ -3,4 +3,9 @@
 .idea
 .vscode
 .fleet
+ticket.json
+*.out
 getticket/.env*
+getticket/ticket.json
+uwsgi/log/*
+uwsgi/*.out
