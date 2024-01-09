@@ -1,2 +1,7 @@
 # GetMoneypin Ticket
-on Developing
+# .env
+```
+clientId = string
+clientSecret = string
+```
+
