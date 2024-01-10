@@ -6,7 +6,7 @@ from flask_cors import CORS, cross_origin
 
 app = Flask(__name__)
 
-#app.config['CORS_HEADERS'] = 'Content-Type'
+# app.config['CORS_HEADERS'] = 'Content-Type'
 
 load_dotenv()
 CORS(app)
@@ -16,10 +16,12 @@ cors = CORS(app, resources={
     r"/getBizInfoOnce/*": {"origin": "*"},
 })
 
+
 @app.route("/apiticket")
 @cross_origin()
 def helloWorld2():
     return "Hello, cross-origin-world!2"
+
 
 @app.route("/")
 @cross_origin()
@@ -82,6 +84,7 @@ def getTicket():
 
     return json.dumps(res)
 
+
 @app.route("/apiticket/getBizInfo", methods=['POST'])
 def getBizInfo():
     content_type = request.headers.get('Content-Type')
@@ -101,19 +104,21 @@ def getBizInfo():
 
     return response.json()
 
+
 def _build_cors_preflight_response():
     response = make_response()
     response.headers.add("Access-Control-Allow-Origin", "*")
     response.headers.add('Access-Control-Allow-Headers', "*")
     response.headers.add('Access-Control-Allow-Methods', "*")
-    response.status="200"
+    response.status = "200"
     return response
+
 
 @app.route("/apiticket/getBizInfoOnce", methods=['POST', "OPTIONS"])
 def getBizInfoOnce():
     if request.method == "OPTIONS":  # CORS preflight
         return _build_cors_preflight_response()
-    elif request.method == "POST": # The actual request following the preflight
+    elif request.method == "POST":  # The actual request following the preflight
         data = {}
         file_path = "./ticket.json"
 
@@ -150,13 +155,16 @@ def getBizInfoOnce():
 
             response = requests.request("POST", url, headers=headers, data=payload)
 
+            if (response.status_code != "200"):
+                newtime = 0
             data = {
                 "tokenset": response.json(),
                 "time": newtime
             }
             print('Debug: key to Store')
-            with open(file_path, 'w', encoding='utf-8') as file:
-                json.dump(data, file)
+            if (response.status_code == "200"):
+                with open(file_path, 'w', encoding='utf-8') as file:
+                    json.dump(data, file)
         else:
             data = temp_data
             print('Debug: Stored key')
@@ -188,6 +196,7 @@ def getBizInfoOnce():
 
         return json.dumps(list)
 
+
 @app.after_request
 def apply_caching(response):
     response.headers["Content-Type"] = "application/json"
@@ -198,5 +207,6 @@ def apply_caching(response):
 
     return response
 
+
 if __name__ == '__main__':
-    app.run(host='0.0.0.0',port='5000')
+    app.run(host='0.0.0.0', port='5000')
