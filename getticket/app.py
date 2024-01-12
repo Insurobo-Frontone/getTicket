@@ -90,9 +90,13 @@ def getToken():
 
 @app.route("/apiticket/getBizInfo", methods=['POST'])
 def getBizInfo():
+    return getBizinfoData(request).json()
+
+
+def getBizinfoData(request, token=None):
     content_type = request.headers.get('Content-Type')
     accept = request.headers.get('accept')
-    authorization = request.headers.get('Authorization')
+    authorization = "Bearer " + token
 
     url = "https://api.moneypin.biz/bizno/v1/biz/info/base"
 
@@ -100,12 +104,14 @@ def getBizInfo():
     headers = {
         'Content-Type': content_type,
         'Accept': accept,
-        'Authorization': authorization
+        'Authorization': authorization,
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": "true"
     }
 
     response = requests.request("POST", url, headers=headers, data=payload)
 
-    return response.json()
+    return response
 
 
 def _build_cors_preflight_response():
@@ -125,6 +131,7 @@ def getBizInfoOnce():
         res = getToken()
         token = res['token']
 
+        res = getBizinfoData(request, token=None)
         content_type = request.headers.get('Content-Type')
         accept = request.headers.get('accept')
         authorization = "Bearer " + token
