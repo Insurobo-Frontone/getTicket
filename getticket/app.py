@@ -3,6 +3,7 @@ import os, requests, json, time, decimal
 from flask import Flask, request, make_response
 from datetime import datetime, timedelta
 from flask_cors import CORS, cross_origin
+from models import model
 
 app = Flask(__name__)
 
@@ -71,7 +72,8 @@ def getToken():
         }
 
         response = requests.request("POST", url, headers=headers, data=payload)
-
+        # response 확인 후 db 추가 로직 필요
+        #
         data = {
             "tokenset": response.json(),
             "time": newtime
@@ -86,6 +88,8 @@ def getToken():
     res = {
         "token": data['tokenset']['token']
     }
+
+    return res
 
 
 @app.route("/apiticket/getBizInfo", methods=['POST'])
@@ -153,6 +157,11 @@ def getBizInfoOnce():
 
         return json.dumps(list)
 
+# @app.route("/apiticket/keyStatistics", methods=['GET'])
+# def key_statistics():
+#     request.remote_addr
+#
+#     return response.status(200)
 
 @app.after_request
 def apply_caching(response):
