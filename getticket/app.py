@@ -72,8 +72,7 @@ def getToken():
         }
 
         response = requests.request("POST", url, headers=headers, data=payload)
-        # response 확인 후 db 추가 로직 필요
-        #
+
         data = {
             "tokenset": response.json(),
             "time": newtime
@@ -152,7 +151,8 @@ def getBizInfoOnce():
         }
 
         response = requests.request("POST", url, headers=headers, data=payload)
-
+        # response 확인 후 db 추가 로직 필요
+        #
         list = response.json()
 
         return json.dumps(list)
