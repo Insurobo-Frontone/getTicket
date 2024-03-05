@@ -106,6 +106,7 @@ def getToken():
     return res
 
 
+
 @app.route("/apiticket/getBizInfo", methods=['POST'])
 def getBizInfo():
     return getBizinfoData(request).json()
@@ -130,6 +131,7 @@ def getBizinfoData(request, token=None):
     response = requests.request("POST", url, headers=headers, data=payload)
 
     return response
+
 
 
 def _build_cors_preflight_response():
@@ -192,6 +194,7 @@ def store_ip_address(ip=None):
 #
 #     return response.status(200)
 
+
 @app.after_request
 def apply_caching(response):
     response.headers["Content-Type"] = "application/json"
@@ -204,4 +207,4 @@ def apply_caching(response):
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port='5500')
+    app.run(host='0.0.0.0', port='5000')
