@@ -1,8 +1,15 @@
-from dotenv import load_dotenv
-import os, requests, json, time, decimal
-from flask import Flask, request, make_response
+import json
+import os
+import requests
+import time
 from datetime import datetime, timedelta
+
+from dotenv import load_dotenv
+from flask import Flask, request, make_response
 from flask_cors import CORS, cross_origin
+from sqlalchemy import create_engine, desc, Column
+from sqlalchemy.orm import sessionmaker
+
 from models import model
 
 app = Flask(__name__)
@@ -10,6 +17,14 @@ app = Flask(__name__)
 # app.config['CORS_HEADERS'] = 'Content-Type'
 
 load_dotenv()
+ConnectionString = os.environ.get("ConnectionString")
+
+engine = create_engine(ConnectionString, echo=True)
+connection = engine.connect()
+
+Session = sessionmaker(bind=engine)
+session = Session()
+
 CORS(app)
 cors = CORS(app, resources={
     r"/getTicket/*": {"origin": "*"},
@@ -152,10 +167,23 @@ def getBizInfoOnce():
 
         response = requests.request("POST", url, headers=headers, data=payload)
         # response 확인 후 db 추가 로직 필요
-        #
+        # response.status_code
+
+        remort_ip = request.remote_addr
+        store_ip_address(remort_ip)
+
         list = response.json()
 
         return json.dumps(list)
+def store_ip_address(ip=None):
+    to_update = {
+        "ip": ip,
+    }
+
+    moneypin_key_statistics = session.query(model.t_moneypin_key_statistics).Order_by(desc(Column('key_date'))).first()
+    insert_stmnt = model.t_moneypin_key_statistics.insert().values(to_update)
+    session.execute(insert_stmnt)
+    session.commit()
 
 # @app.route("/apiticket/keyStatistics", methods=['GET'])
 # def key_statistics():
