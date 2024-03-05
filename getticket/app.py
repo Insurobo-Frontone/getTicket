@@ -170,7 +170,8 @@ def getBizInfoOnce():
         # response.status_code
 
         remort_ip = request.remote_addr
-        store_ip_address(remort_ip)
+        if response.status_code == 200:
+            store_ip_address(remort_ip)
 
         list = response.json()
 
