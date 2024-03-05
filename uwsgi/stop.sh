@@ -1,3 +1,3 @@
-#/bin/bash
+#!/bin/bash
 
-uwsgi --stop ./project-master.pid
+uwsgi --stop /Users/krpark/Developer/insurobo/getTicket/uwsgi/project-master.pid
