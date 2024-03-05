@@ -181,7 +181,7 @@ def store_ip_address(ip=None):
         "ip": ip,
     }
 
-    moneypin_key_statistics = session.query(model.t_moneypin_key_statistics).Order_by(desc(Column('key_date'))).first()
+    moneypin_key_statistics = session.query(model.t_moneypin_key_statistics).order_by(desc(Column('key_date'))).first()
     insert_stmnt = model.t_moneypin_key_statistics.insert().values(to_update)
     session.execute(insert_stmnt)
     session.commit()
