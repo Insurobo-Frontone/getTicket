@@ -19,6 +19,10 @@ app = Flask(__name__)
 load_dotenv()
 
 remote_api_url = os.environ.get("REMOTE_API_URL")
+
+clientId = os.environ.get('clientId')
+clientSecret = os.environ.get('clientSecret')
+
 ConnectionString = os.environ.get("ConnectionString")
 
 engine = create_engine(ConnectionString, echo=True)
@@ -74,8 +78,6 @@ def getToken():
     # print('Debug : '+newdatetimeobj.timestamp)
 
     if (newdatetimeobj > olddatetimeobj):
-        clientId = os.environ.get('clientId')
-        clientSecret = os.environ.get('clientSecret')
         url = "https://api.moneypin.biz/bizno/v1/auth/token"
 
         payload = json.dumps({
