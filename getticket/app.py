@@ -17,6 +17,8 @@ app = Flask(__name__)
 # app.config['CORS_HEADERS'] = 'Content-Type'
 
 load_dotenv()
+
+remote_api_url = os.environ.get("REMOTE_API_URL")
 ConnectionString = os.environ.get("ConnectionString")
 
 engine = create_engine(ConnectionString, echo=True)
@@ -105,8 +107,6 @@ def getToken():
 
     return res
 
-
-
 @app.route("/apiticket/getBizInfo", methods=['POST'])
 def getBizInfo():
     return getBizinfoData(request).json()
@@ -131,8 +131,6 @@ def getBizinfoData(request, token=None):
     response = requests.request("POST", url, headers=headers, data=payload)
 
     return response
-
-
 
 def _build_cors_preflight_response():
     response = make_response()
@@ -178,6 +176,28 @@ def getBizInfoOnce():
         list = response.json()
 
         return json.dumps(list)
+
+@app.route("/apiticket/getBizInfoRemote", methods=['POST', 'OPTIONS'])
+def getBizInfoRemote():
+        if request.method == "OPTIONS":  # CORS preflight
+            return _build_cors_preflight_response()
+        elif request.method == "POST": 
+            payload = json.dumps({
+                "grantType": "ClientCredentials",
+                "clientId": clientId,
+                "clientSecret": clientSecret
+            })
+            headers = {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+
+            url = remote_api_url + '/apiticket/getBizInfoOnce'
+            response = requests.request("POST", url, headers=headers, data=payload)
+            
+            list = response.json()
+            return json.dumps(list)
+
 def store_ip_address(ip=None):
     to_update = {
         "ip": ip,
