@@ -175,9 +175,9 @@ def getBizInfoOnce():
         if response.status_code == 200:
             store_ip_address(remort_ip)
 
-        list = response.json()
+        list_sponse = response.json()
 
-        return json.dumps(list)
+        return json.dumps(list_sponse)
 
 @app.route("/apiticket/getBizInfoRemote", methods=['POST', 'OPTIONS'])
 def getBizInfoRemote():
@@ -197,8 +197,8 @@ def getBizInfoRemote():
             url = remote_api_url + '/apiticket/getBizInfoOnce'
             response = requests.request("POST", url, headers=headers, data=payload)
             
-            list = response.json()
-            return json.dumps(list)
+            list_sponse = response.json()
+            return json.dumps(list_sponse)
 
 def store_ip_address(ip=None):
     to_update = {
