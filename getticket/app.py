@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from flask import Flask, request, make_response
 from flask_cors import CORS, cross_origin
+from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine, desc, Column
 from sqlalchemy.orm import sessionmaker
 
@@ -117,7 +118,7 @@ def getBizInfo():
 def getBizinfoData(request, token=None):
     content_type = request.headers.get('Content-Type')
     accept = request.headers.get('accept')
-    authorization = "Bearer " + token
+    authorization = request.headers.get('Authorization')
 
     url = "https://api.moneypin.biz/bizno/v1/biz/info/base"
 
@@ -154,7 +155,7 @@ def getBizInfoOnce():
         res = getBizinfoData(request, token=None)
         content_type = request.headers.get('Content-Type')
         accept = request.headers.get('accept')
-        authorization = "Bearer " + token
+        authorization = request.headers.get('Authorization')
 
         url = "https://api.moneypin.biz/bizno/v1/biz/info/base"
 
