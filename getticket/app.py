@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from flask import Flask, request, make_response
 from flask_cors import CORS, cross_origin
+from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine, desc, Column
 from sqlalchemy.orm import sessionmaker
 
@@ -109,6 +110,7 @@ def getToken():
 
     return res
 
+
 @app.route("/apiticket/getBizInfo", methods=['POST'])
 def getBizInfo():
     return getBizinfoData(request).json()
@@ -134,6 +136,7 @@ def getBizinfoData(request, token=None):
 
     return response
 
+
 def _build_cors_preflight_response():
     response = make_response()
     response.headers.add("Access-Control-Allow-Origin", "*")
@@ -151,7 +154,7 @@ def getBizInfoOnce():
         res = getToken()
         token = res['token']
 
-        res = getBizinfoData(request, token=None)
+        res = getBizinfoData(request, token)
         content_type = request.headers.get('Content-Type')
         accept = request.headers.get('accept')
         authorization = "Bearer " + token
@@ -163,8 +166,8 @@ def getBizInfoOnce():
             'Content-Type': content_type,
             'Accept': accept,
             'Authorization': authorization,
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Credentials": "true"
+            # "Access-Control-Allow-Origin": "*",
+            # "Access-Control-Allow-Credentials": "true"
         }
 
         response = requests.request("POST", url, headers=headers, data=payload)
@@ -179,28 +182,39 @@ def getBizInfoOnce():
 
         return json.dumps(list_sponse)
 
+
 @app.route("/apiticket/getBizInfoRemote", methods=['POST', 'OPTIONS'])
 def getBizInfoRemote():
-        if request.method == "OPTIONS":  # CORS preflight
-            return _build_cors_preflight_response()
-        elif request.method == "POST": 
-            payload = json.dumps({
-                "grantType": "ClientCredentials",
-                "clientId": clientId,
-                "clientSecret": clientSecret
-            })
-            headers = {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            }
+    if request.method == "OPTIONS":  # CORS preflight
+        return _build_cors_preflight_response()
+    elif request.method == "POST":
+        payload_json = json.dumps(request.json)
+        payload_dict = json.loads(payload_json)
+        payload_dict["grantType"] = "ClientCredentials"
+        payload_dict["clientId"] = clientId
+        payload_dict["clientSecret"] = clientSecret
 
-            url = remote_api_url + '/apiticket/getBizInfoOnce'
-            response = requests.request("POST", url, headers=headers, data=payload)
-            
-            list_sponse = response.json()
-            return json.dumps(list_sponse)
+        payload = json.dumps(payload_dict)
+        # payload = json.dumps({
+        #     "grantType": "ClientCredentials",
+        #     "clientId": clientId,
+        #     "clientSecret": clientSecret,
+        #     "bizNoList": json.dumps(request.json)
+        #
+        # })
+        headers = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        }
 
-def store_ip_address(ip=None):
+        url = remote_api_url + '/apiticket/getBizInfoOnce'
+        response = requests.request("POST", url, headers=headers, data=payload)
+
+        list_sponse = response.json()
+        return json.dumps(list_sponse)
+
+
+def store_ip_address(ip: str = None):
     to_update = {
         "ip": ip,
     }
@@ -209,6 +223,7 @@ def store_ip_address(ip=None):
     insert_stmnt = model.t_moneypin_key_statistics.insert().values(to_update)
     session.execute(insert_stmnt)
     session.commit()
+
 
 # @app.route("/apiticket/keyStatistics", methods=['GET'])
 # def key_statistics():
