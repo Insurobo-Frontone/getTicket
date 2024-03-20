@@ -188,11 +188,20 @@ def getBizInfoRemote():
     if request.method == "OPTIONS":  # CORS preflight
         return _build_cors_preflight_response()
     elif request.method == "POST":
-        payload = json.dumps({
-            "grantType": "ClientCredentials",
-            "clientId": clientId,
-            "clientSecret": clientSecret
-        })
+        payload_json = json.dumps(request.json)
+        payload_dict = json.loads(payload_json)
+        payload_dict["grantType"] = "ClientCredentials"
+        payload_dict["clientId"] = clientId
+        payload_dict["clientSecret"] = clientSecret
+
+        payload = json.dumps(payload_dict)
+        # payload = json.dumps({
+        #     "grantType": "ClientCredentials",
+        #     "clientId": clientId,
+        #     "clientSecret": clientSecret,
+        #     "bizNoList": json.dumps(request.json)
+        #
+        # })
         headers = {
             'Content-Type': 'application/json',
             'Accept': 'application/json'
