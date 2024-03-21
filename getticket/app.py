@@ -21,6 +21,8 @@ load_dotenv()
 
 remote_api_url = os.environ.get("REMOTE_API_URL")
 
+
+
 clientId = os.environ.get('clientId')
 clientSecret = os.environ.get('clientSecret')
 
@@ -37,6 +39,7 @@ cors = CORS(app, resources={
     r"/getTicket/*": {"origin": "*"},
     r"/getBizInfo/*": {"origin": "*"},
     r"/getBizInfoOnce/*": {"origin": "*"},
+    r"/getBizInfoRemote/*": {"origin": "*"},
 })
 
 
@@ -177,7 +180,6 @@ def getBizInfoOnce():
         remort_ip = request.remote_addr
         if response.status_code == 200:
             store_ip_address(remort_ip)
-
         list_sponse = response.json()
 
         return json.dumps(list_sponse)
@@ -218,11 +220,15 @@ def store_ip_address(ip: str = None):
     to_update = {
         "ip": ip,
     }
-
-    moneypin_key_statistics = session.query(model.t_moneypin_key_statistics).order_by(desc(Column('key_date'))).first()
-    insert_stmnt = model.t_moneypin_key_statistics.insert().values(to_update)
-    session.execute(insert_stmnt)
-    session.commit()
+    try:
+        moneypin_key_statistics = session.query(model.t_moneypin_key_statistics).order_by(desc(Column('key_date'))).first()
+        insert_stmnt = model.t_moneypin_key_statistics.insert().values(to_update)
+        session.execute(insert_stmnt)
+        session.commit()
+    except:
+        session.rollback()
+    finally:
+        session.close()
 
 
 # @app.route("/apiticket/keyStatistics", methods=['GET'])
